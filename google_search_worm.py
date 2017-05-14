@@ -58,6 +58,7 @@ for fd in os.listdir(basedir):
             print(fd+' Fetched!')
             index=re.findall('(?<=aid=)[0-9]*',link)
             os.rename(os.path.join(basedir,fd),os.path.join(basedir,fd+'[anidb-'+index[0]+']'))
+            break
     if not success:
         print(fd+' fetching failed')
 
