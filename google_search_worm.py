@@ -7,7 +7,7 @@ import re
 
 def url_parser(query):
     edited = parse.quote_plus(query+' site:anidb.net')
-    return 'https://www.google.com.tw/search?q='+edited+'&oq='+edited+'&aqs=chrome..69i57j69i64.1558j0j9&sourceid=chrome&ie=UTF-8'
+    return 'https://www.google.com.tw/search?q='+edited+'&oq='+edited+'&filter=0&aqs=chrome..69i57j69i64.1558j0j9&sourceid=chrome&ie=UTF-8'
 
 
 def get_content(url):
@@ -22,6 +22,8 @@ def get_content(url):
         page = BeautifulSoup(urlopen(req).read().decode('utf-8'),"html.parser")
         link = []
         link = page.find(class_='srg').find_all('a',href=re.compile('anidb'),class_=False)
+        if link == None:
+            link = find(class_='g').find('a',href=re.compile('anidb'),class_=False)
     except AttributeError as e:
         print(e)
     return link
@@ -38,15 +40,24 @@ for fd in os.listdir(basedir):
         print(fd+' is not a dir')
         continue
     if 'anidb' in fd:
-        print(fd+' has been edited')
+        print(fd+' has been tagged')
         continue
+    success = False
     results = search(fd)
     for links in results:
         link = links['href']
         print(link)
         if 'anidb.net/a' in link:
+            success = True
             print(fd+' Fetched!')
             index=re.findall('(?<=anidb.net/a)[0-9]*',link)
             os.rename(os.path.join(basedir,fd),os.path.join(basedir,fd+'[anidb-'+index[0]+']'))
             break
+        elif 'aid=' in link:
+            success = True
+            print(fd+' Fetched!')
+            index=re.findall('(?<=aid=)[0-9]*',link)
+            os.rename(os.path.join(basedir,fd),os.path.join(basedir,fd+'[anidb-'+index[0]+']'))
+    if not success:
+        print(fd+' fetching failed')
 
